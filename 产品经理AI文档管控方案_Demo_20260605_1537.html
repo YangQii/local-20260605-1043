@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品经理AI生成文档版本管控方案</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #EEF2FF;
+            --danger: #DC2626;
+            --danger-light: #FEF2F2;
+            --warning: #D97706;
+            --warning-light: #FFFBEB;
+            --success: #059669;
+            --success-light: #ECFDF5;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-500: #6B7280;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F0F2F7;
+            color: var(--gray-800);
+            line-height: 1.7;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            color: #fff;
+            padding: 48px 0 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.08) 0%, transparent 50%);
+        }
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            position: relative;
+            letter-spacing: 0.5px;
+        }
+        .header .subtitle {
+            margin-top: 10px;
+            font-size: 1rem;
+            opacity: 0.85;
+            position: relative;
+        }
+        .header .badge-row {
+            margin-top: 16px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        .header .badge {
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        /* ── Container ── */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px 60px;
+        }
+
+        /* ── Navigation Tabs ── */
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+            background: #fff;
+            border-radius: var(--radius);
+            margin-top: -20px;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        .nav-tab {
+            flex: 1;
+            padding: 16px 20px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--gray-500);
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .nav-tab:hover { color: var(--gray-700); background: var(--gray-50); }
+        .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ── Section ── */
+        .section {
+            margin-top: 28px;
+        }
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--gray-200);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title .icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-100);
+        }
+        .card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--gray-900);
+        }
+        .card p, .card li { font-size: 0.92rem; color: var(--gray-700); }
+
+        /* ── Alert Block ── */
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--radius-sm);
+            margin: 16px 0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-left: 4px solid;
+        }
+        .alert-danger { background: var(--danger-light); border-color: var(--danger); color: #991B1B; }
+        .alert-warning { background: var(--warning-light); border-color: var(--warning); color: #92400E; }
+        .alert-info { background: var(--primary-light); border-color: var(--primary); color: #3730A3; }
+        .alert-success { background: var(--success-light); border-color: var(--success); color: #065F46; }
+
+        /* ── Table ── */
+        .table-wrap { overflow-x: auto; margin: 16px 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            background: #fff;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        thead { background: linear-gradient(135deg, #4F46E5, #7C3AED); color: #fff; }
+        thead th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--gray-100);
+            vertical-align: top;
+        }
+        tbody tr:hover { background: var(--gray-50); }
+        tbody tr:last-child td { border-bottom: none; }
+
+        /* ── Version Flow ── */
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin: 24px 0;
+        }
+        .flow-step {
+            background: #fff;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            text-align: center;
+            min-width: 140px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+        .flow-step:hover { transform: translateY(-2px); }
+        .flow-step .step-num {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .flow-step .step-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+        .flow-step .step-desc { font-size: 0.8rem; color: var(--gray-500); }
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: var(--gray-300);
+            font-weight: 700;
+        }
+
+        /* ── Code Block ── */
+        .code-block {
+            background: #1E293B;
+            color: #E2E8F0;
+            border-radius: var(--radius-sm);
+            padding: 20px 24px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        .code-block .tag { color: #F472B6; }
+        .code-block .str { color: #A5D6FF; }
+
+        /* ── Steps Numbered ── */
+        .steps-list { list-style: none; padding: 0; }
+        .steps-list li {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .steps-list li:last-child { border-bottom: none; }
+        .steps-list .step-badge {
+            flex-shrink: 0;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .steps-list .step-content { font-size: 0.92rem; }
+        .steps-list .step-content strong { color: var(--primary); }
+
+        /* ── Checklist ── */
+        .checklist { list-style: none; padding: 0; }
+        .checklist li {
+            padding: 10px 0;
+            padding-left: 28px;
+            position: relative;
+            font-size: 0.92rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .checklist li:last-child { border-bottom: none; }
+        .checklist li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        /* ── Two Column Grid ── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 32px;
+            color: var(--gray-500);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--gray-200);
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<div class="header">
+    <h1>产品经理AI生成文档版本管控方案</h1>
+    <p class="subtitle">AI初稿 + 人工定稿 + 版本基线管控</p>
+    <div class="badge-row">
+        <span class="badge">📋 版本管控</span>
+        <span class="badge">🤖 AI工作流</span>
+        <span class="badge">📦 文档规范</span>
+        <span class="badge">🔧 工具落地</span>
+    </div>
+</div>
+
+<div class="container">
+
+<!-- ═══════════════ NAV TABS ═══════════════ -->
+<div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab(0, this)">📐 版本管控方案</div>
+    <div class="nav-tab" onclick="switchTab(1, this)">🚀 AI全工作流落地</div>
+</div>
+
+<!-- ═══════════════ TAB 1: 版本管控 ═══════════════ -->
+<div class="tab-content active" id="tab-0">
+
+    <!-- 核心思路 -->
+    <div class="alert alert-info" style="margin-top: 28px;">
+        <strong>核心思路：</strong>AI不确定性约束在草稿层，正式文档不直接由AI产出终版
+    </div>
+
+    <!-- 一、前置规范 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#EEF2FF;color:#4F46E5;">📝</span>
+            前置规范：标准化Prompt降低内容波动
+        </div>
+        <div class="card">
+            <h3>1. 固定复用结构化Prompt模板</h3>
+            <p style="margin-bottom:10px;">固定指令约束输出格式，规避结构、措辞随机变动：</p>
+            <div class="code-block">
+<span class="tag">输出规范：</span><br>
+1.明确文档类型（PRD/需求文档/接口说明等）+<span class="str">标注版本V0.X</span>；<br>
+2.固定目录：概述、业务背景、需求明细、原型说明、异常逻辑、落地排期，<span class="str">不得擅自增减章节</span>；<br>
+3.沿用项目历史文档专有话术与专业术语；<br>
+4.仅填充需求内容，<span class="str">不自主拓展无关内容</span>；<br>
+5.文档末尾统一标注：【<span class="str">AI初稿，待人工修订，不可直接用于评审落地</span>】
+            </div>
+        </div>
+        <div class="card">
+            <h3>2. 拆分分段生成策略</h3>
+            <ul class="checklist">
+                <li>长篇PRD拆分：业务背景、需求细则、异常规则、验收标准分模块分次生成，单次限定单一模块</li>
+                <li>存量项目生成：附带往期定稿文档片段作为上下文输入，统一业务口径与行文风格</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 二、三级版本隔离 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#FEF2F2;color:#DC2626;">📑</span>
+            文档三级版本隔离规范
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>版本层级</th>
+                        <th>版本标识</th>
+                        <th>生成规则</th>
+                        <th>存储路径规范</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span style="background:#FEF2F2;color:#DC2626;padding:2px 10px;border-radius:12px;font-size:0.85rem;font-weight:600;">AI草稿版</span></td>
+                        <td><code>V0.0_AI_日期</code></td>
+                        <td>AI原生输出，仅作为素材参考，不参与评审、不外发</td>
+                        <td>草稿文件夹：<code>需求名称_AI草稿_YYYYMMDD</code></td>
+                    </tr>
+                    <tr>
+                        <td><span style="background:#FFFBEB;color:#D97706;padding:2px 10px;border-radius:12px;font-size:0.85rem;font-weight:600;">人工修订版</span></td>
+                        <td><code>V0.1 ~ V0.9</code></td>
+                        <td>PM基于优选AI草稿修正错误、补充业务细节，多轮内部调整</td>
+                        <td>修订专用目录，每次修改附带变更备注</td>
+                    </tr>
+                    <tr>
+                        <td><span style="background:#ECFDF5;color:#059669;padding:2px 10px;border-radius:12px;font-size:0.85rem;font-weight:600;">正式基线版</span></td>
+                        <td><code>V1.0 / V2.0+</code></td>
+                        <td>评审完成后归档定稿，定稿后禁止AI全量覆写</td>
+                        <td>正式知识库/项目文档库，锁定基础权限</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="alert alert-danger">
+            ⚠️ <strong>硬性管控规则：</strong>归档正式文档严禁使用AI直接全量重写，迭代仅用AI生成新增内容草稿
+        </div>
+    </div>
+
+    <!-- 三、全流程落地 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#ECFDF5;color:#059669;">🔄</span>
+            全流程落地步骤
+        </div>
+        <div class="flow">
+            <div class="flow-step">
+                <div class="step-num">1</div>
+                <div class="step-title">初稿阶段</div>
+                <div class="step-desc">AI多份备选草稿<br>V0.0-A / V0.0-B</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="step-num">2</div>
+                <div class="step-title">修订阶段</div>
+                <div class="step-desc">人工优化迭代<br>V0.1 → V0.9</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="step-num">3</div>
+                <div class="step-title">定稿归档</div>
+                <div class="step-desc">评审通过<br>V1.0 正式版</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">
+                <div class="step-num">4</div>
+                <div class="step-title">迭代改版</div>
+                <div class="step-desc">基线文档增量修改<br>V1.1 / V2.0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 四、配套工具 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#FFFBEB;color:#D97706;">🔧</span>
+            配套工具落地细则
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <h3>📄 在线协作文档</h3>
+                <p style="margin-bottom:6px;">飞书 / 语雀 / Confluence</p>
+                <ul class="checklist">
+                    <li>开启文档历史回溯，自动留存快照</li>
+                    <li>定稿文档锁定编辑权限</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>💾 本地Word+网盘</h3>
+                <p style="margin-bottom:6px;">统一文件命名规则：</p>
+                <code style="background:#F3F4F6;padding:4px 10px;border-radius:4px;font-size:0.85rem;">【项目名】_文档名称_Vx.x_日期_修订人</code>
+                <p style="margin-top:8px;font-size:0.85rem;color:#6B7280;">示例：【会员体系】续费功能PRD_V1.0_20260605_产品A</p>
+            </div>
+            <div class="card">
+                <h3>📋 项目管理工具</h3>
+                <p style="margin-bottom:6px;">禅道 / Jira</p>
+                <ul class="checklist">
+                    <li>版本文档绑定需求工单</li>
+                    <li>变更记录与文档一一关联</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>🤖 AI文档比对</h3>
+                <p style="margin-bottom:6px;">版本差异核验</p>
+                <ul class="checklist">
+                    <li>AI新版 vs 基线文档差异</li>
+                    <li>核验通过后生成新版本</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 五、存量文档更新 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#EEF2FF;color:#4F46E5;">🔄</span>
+            存量正式文档AI更新管控规则
+        </div>
+        <div class="card">
+            <ol class="steps-list">
+                <li>
+                    <span class="step-badge">1</span>
+                    <span class="step-content">导出当前<strong>正式版全文</strong>作为上下文喂入AI</span>
+                </li>
+                <li>
+                    <span class="step-badge">2</span>
+                    <span class="step-content">Prompt约束：<strong>仅修改指定变更内容，未改动原有正文保持原文一字不变</strong></span>
+                </li>
+                <li>
+                    <span class="step-badge">3</span>
+                    <span class="step-content">AI生成更新草稿 → 人工对比新旧文档差异 → 核验通过后生成新版本，<strong>原正式文档原样归档不覆盖</strong></span>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- 六、管理制度 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#FEF2F2;color:#DC2626;">🚫</span>
+            落地管理制度细则
+        </div>
+        <div class="alert alert-danger">
+            🚫 禁止直接把未经人工修订的AI文档交付研发、测试作为正式依据
+        </div>
+        <div class="alert alert-warning">
+            📝 正式文档所有变更留存修订记录，由AI生成的段落统一在备注标注内容来源
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ TAB 2: AI全工作流 ═══════════════ -->
+<div class="tab-content" id="tab-1">
+
+    <!-- 概述 -->
+    <div class="alert alert-info" style="margin-top: 28px;">
+        <strong>AI赋能产品经理全工作流落地手册</strong> —— 从需求调研到上线复盘，AI全链路提效
+    </div>
+
+    <!-- 一、需求调研 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#EEF2FF;color:#4F46E5;">🔍</span>
+            需求调研阶段：AI缩短调研&信息整理周期
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <h3>1. 行业&竞品分析</h3>
+                <ul class="checklist">
+                    <li>快速汇总竞品功能清单、优缺点、商业模式、用户痛点</li>
+                    <li>抓取行业政策、财报、行业报告摘要</li>
+                    <li>批量梳理同类产品评论，提炼用户原始需求</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>2. 用户访谈信息处理</h3>
+                <ul class="checklist">
+                    <li>录音转文字，AI自动拆分痛点、需求、闲聊</li>
+                    <li>快速提炼访谈纪要，自动生成访谈小结</li>
+                </ul>
+            </div>
+        </div>
+        <div class="alert alert-info" style="margin-top:12px;">
+            💡 <strong>Prompt示例：</strong>整理XX行业3款头部产品，从功能、定价、目标用户、劣势4个维度生成对比表，精简无冗余。
+        </div>
+    </div>
+
+    <!-- 二、需求设计 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#ECFDF5;color:#059669;">✏️</span>
+            需求设计阶段：PRD、原型、规则快速落地
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <h3>1. 文档产出</h3>
+                <ul class="checklist">
+                    <li>根据需求清单自动生成PRD初稿</li>
+                    <li>输出接口需求、数据字典、埋点需求初稿</li>
+                    <li>AI只生成V0.0草稿，人工校验后归档</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>2. 业务逻辑&异常梳理</h3>
+                <ul class="checklist">
+                    <li>输入主流程，AI穷举边界、异常分支</li>
+                    <li>覆盖断电、网络异常、误操作、越权等场景</li>
+                </ul>
+            </div>
+            <div class="card" style="grid-column: 1 / -1;">
+                <h3>3. 原型文案、交互文案生成</h3>
+                <ul class="checklist">
+                    <li>页面按钮、弹窗、提示文案、报错话术批量生成，统一产品话术规范</li>
+                    <li>输出Axure/墨刀页面字段清单，直接复制填入原型</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 三、评审协同 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#FFFBEB;color:#D97706;">🤝</span>
+            需求评审&跨部门协同
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <h3>1. 评审材料准备</h3>
+                <ul class="checklist">
+                    <li>从PRD提炼PPT提纲，一键生成初稿</li>
+                    <li>预判研发、测试、运营提问，整理答疑话术</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>2. 会议纪要自动化</h3>
+                <ul class="checklist">
+                    <li>语音转写 → AI区分决议、待办、责任人</li>
+                    <li>结构化输出会议纪要，同步项目工具</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 四、项目跟进 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#EEF2FF;color:#4F46E5;">📊</span>
+            项目跟进：研发落地、测试、上线全流程提效
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <h3>1. 需求拆解与排期</h3>
+                <p>复杂需求拆解细分任务，协助拆分前端/后端/测试工作量清单，辅助评估工时</p>
+            </div>
+            <div class="card">
+                <h3>2. 测试用例辅助</h3>
+                <p>依据PRD需求，AI生成基础正向+反向用例清单，测试在此基础上补充优化</p>
+            </div>
+            <div class="card" style="grid-column: 1 / -1;">
+                <h3>3. 需求变更管理</h3>
+                <p>变更需求录入后，AI自动梳理：变更影响范围、关联模块、潜在风险，输出变更说明文档</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 五、运营复盘 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#ECFDF5;color:#059669;">📈</span>
+            上线后运营&复盘
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <h3>1. 数据分析解读</h3>
+                <p>粘贴后台数据，AI解读数据异动原因、优化方向，输出数据分析小结</p>
+            </div>
+            <div class="card">
+                <h3>2. 产品复盘文档</h3>
+                <p>输入上线成果、问题、踩坑记录，自动生成复盘文档：成果总结、遗留问题、下期优化清单</p>
+            </div>
+            <div class="card" style="grid-column: 1 / -1;">
+                <h3>3. 运营文案配套</h3>
+                <p>活动规则、用户引导、新版本公告、推送文案批量撰写</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 六、资产库 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#FEF2F2;color:#DC2626;">📦</span>
+            标准化沉淀：搭建产品资产库
+        </div>
+        <div class="card">
+            <ul class="steps-list">
+                <li><span class="step-badge">1</span><span class="step-content"><strong>Prompt资产化</strong>：PRD、竞品、复盘、用例四类Prompt版本归档，固定模板减少AI输出波动</span></li>
+                <li><span class="step-badge">2</span><span class="step-content"><strong>术语库沉淀</strong>：项目专属名词、业务规则录入知识库，AI生成文档时强制引用，统一口径</span></li>
+                <li><span class="step-badge">3</span><span class="step-content"><strong>历史正式文档入库</strong>：新生成内容以定稿基线为参照，配合前文版本管控规范</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 七、避坑 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#FFFBEB;color:#D97706;">⚠️</span>
+            避坑原则（PM使用AI红线）
+        </div>
+        <div class="alert alert-danger">🚫 AI只做初稿生产、信息搜集、辅助整理，所有需求逻辑、业务规则必须人工校验</div>
+        <div class="alert alert-danger">🚫 正式PRD、上线标准文档禁止AI直接定稿，遵循「AI草稿→人工修订→正式归档」三级版本规范</div>
+        <div class="alert alert-danger">🚫 核心业务逻辑、资金链路、风控规则，AI内容仅做参考，严禁直接采信</div>
+    </div>
+
+    <!-- 八、工具 -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon" style="background:#EEF2FF;color:#4F46E5;">🧰</span>
+            常用AI工具分工
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>工具类别</th><th>代表工具</th><th>用途</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>大模型</strong></td><td>豆包 / Claude</td><td>文档撰写、梳理逻辑、文案、总结纪要</td></tr>
+                    <tr><td><strong>AI文档比对</strong></td><td>文档比对工具</td><td>校验AI新版与基线文档差异</td></tr>
+                    <tr><td><strong>AI转写</strong></td><td>转写工具</td><td>访谈、会议录音整理</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</div><!-- /container -->
+
+<div class="footer">
+    AI初稿，待人工修订 · 产品经理AI文档管控方案 Demo · 2026.06.05
+</div>
+
+<script>
+function switchTab(index, el) {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + index).classList.add('active');
+}
+</script>
+
+</body>
+</html>
